@@ -9,10 +9,6 @@ from utils.auth import hash_password, verify_password, create_jwt_token, get_cur
 router = APIRouter()
 
 
-@router.get('/')
-def hello():
-    return {"message": "Hello World"}
-
 @router.post("/signup")
 def admin_signup(admin: AdminSignup, db: Session = Depends(get_db)):
     existing_admin = db.query(Admin).filter(Admin.email == admin.email).first()
@@ -60,6 +56,30 @@ def delete_user(user: UserUpdate, db: Session = Depends(get_db), current_admin: 
     db.delete(db_user)
     db.commit()
     return {"message": "User deleted successfully"}
+
+
+@router.put("/user")
+def update_user(user: UserUpdate, db: Session = Depends(get_db), current_admin: Admin = Depends(get_current_admin)):
+    admin = db.query(Admin).filter(Admin.email == user.admin_email).first()
+    if not admin:
+        raise HTTPException(status_code=404, detail="Admin not found")
+    
+    db_user = db.query(User).filter(User.email == user.user_email).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    
+    update_info = user.update_info
+    if "username" in update_info:
+        db_user.username = update_info["username"]
+    if "role" in update_info:
+        db_user.role = update_info["role"]
+    if "permissions" in update_info:
+        db_user.permissions = ",".join(update_info["permissions"])  # Handle permissions list if required
+
+    db.commit()
+    return {"message": "User updated successfully"}
+
 
 
 @router.post("/getusers")
