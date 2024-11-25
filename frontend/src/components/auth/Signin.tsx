@@ -17,7 +17,8 @@ export default function Signin() {
         e.preventDefault();
         try {
             const response = await api.post('/admin/login', { email, password });
-            dispatch(loginAdmin({ email: response.data.email, token: response.data.token }));
+            console.log(response.data)
+            dispatch(loginAdmin({ email: response.data.email, token: response.data.access_token, tokenType: response.data.token_type }));
             navigate('/dashboard');
         } catch (err) {
             console.log(err);
