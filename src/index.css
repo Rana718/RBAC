@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+    }
+
+    .hover-scale {
+        @apply transition-transform duration-200;
+    }
+
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+}
