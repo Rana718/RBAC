@@ -1,18 +1,22 @@
-from motor.motor_asyncio import AsyncIOMotorClient
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
-from typing import Optional
 
 load_dotenv()
 
-MONGO_URI = os.getenv("DB_URL")
+POSTGRES_URI = os.getenv("DB_URL")
 
-class Database:
-    client: Optional[AsyncIOMotorClient] = None
-    
-    def get_database(self):
-        if not self.client:
-            self.client = AsyncIOMotorClient(MONGO_URI)
-        return self.client["user_role_management"]
+engine = create_engine(POSTGRES_URI)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-db = Database()
+Base = declarative_base()
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

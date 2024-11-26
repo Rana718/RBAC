@@ -18,10 +18,14 @@ class UserUpdate(BaseModel):
     status: Optional[str]
 
 class UserResponse(UserBase):
-    _id: str
+    id: int
+    
+    class Config:
+        orm_mode = True
 
 class RoleBase(BaseModel):
     name: str
+    description: str
     permissions: List[str]
 
 class RoleCreate(RoleBase):
@@ -29,7 +33,11 @@ class RoleCreate(RoleBase):
 
 class RoleUpdate(BaseModel):
     name: Optional[str]
+    description: Optional[str]
     permissions: Optional[List[str]]
 
 class RoleResponse(RoleBase):
-    _id: str
+    id: int
+    
+    class Config:
+        orm_mode = True
