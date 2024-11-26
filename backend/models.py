@@ -1,5 +1,7 @@
 from database import db
 
+def get_users_collection():
+    return db.get_database()["users"]
 
-users_collection = db["users"]
-roles_collection = db["roles"]
+def get_roles_collection():
+    return db.get_database()["roles"]
