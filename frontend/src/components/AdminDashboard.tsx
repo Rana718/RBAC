@@ -3,6 +3,7 @@ import { AppDispatch, RootState } from "../redux/store";
 import { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { deleteUser, setUsers } from "../redux/userSlice";
+import { logoutAdmin } from "../redux/adminSlice";
 import { useNavigate } from "react-router-dom";
 import UserFormModel from "./UserFormModel";
 import type { User } from '../../types';
@@ -17,6 +18,7 @@ export default function AdminDashboard() {
     const [showModel, setShowModel] = useState(false);
     const [showAddModel, setShowAddModel] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User>();
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (!adminEmail) {
@@ -32,13 +34,18 @@ export default function AdminDashboard() {
     }, [adminEmail, navigate, dispatch, showAddModel, selectedUser]);
 
     const handleDelete = (userEmail: string) => {
+        setIsLoading(true);
         api.delete('/admin/user', {
             data: { admin_email: adminEmail, user_email: userEmail }
         })
             .then(() => {
+                setIsLoading(false);
                 dispatch(deleteUser(users.find(user => user.email === userEmail)!.id));
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                console.log(err)
+                setIsLoading(false);
+            });
     };
 
     const handleUpdate = (user: User) => {
@@ -48,6 +55,11 @@ export default function AdminDashboard() {
 
     const handleAddUser = () => {
         setShowAddModel(true);
+    };
+
+    const handleLogout = () => {
+        dispatch(logoutAdmin());
+        navigate('/signin');
     };
 
     return (
@@ -61,9 +73,17 @@ export default function AdminDashboard() {
                 Admin Dashboard
             </motion.h1>
 
-            <button onClick={handleAddUser} className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                Add User
-            </button>
+            <div className="flex justify-between items-center mb-2 p-4 rounded">
+                <button onClick={handleAddUser} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Add User
+                </button>
+
+                <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                    Logout
+                </button>
+            </div>
+
+
 
             <div className="overflow-x-auto">
                 <table className="table-auto w-full bg-white shadow-md rounded-lg overflow-hidden">
@@ -101,15 +121,21 @@ export default function AdminDashboard() {
                                 </td>
 
                                 <td className="border px-4 py-2 text-center space-x-4">
+                                    {isLoading && (
+                                        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+                                            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                        </div>
+                                    )}
+
                                     <button
-                                        onClick={() => handleUpdate(user)}
+                                        onClick={() => handleUpdate(user)} disabled={isLoading}
                                         className="text-blue-500 font-semibold hover:underline"
                                     >
                                         Update
                                     </button>
 
                                     <button
-                                        onClick={() => handleDelete(user.email)}
+                                        onClick={() => handleDelete(user.email)} disabled={isLoading}
                                         className="text-red-500 font-semibold hover:underline"
                                     >
                                         Delete

@@ -11,17 +11,21 @@ export default function Signin() {
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
 
 
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
+        setIsLoading(true);
         try {
             const response = await api.post('/admin/login', { email, password });
+            setIsLoading(false);
             console.log(response.data)
             dispatch(loginAdmin({ email: response.data.email, token: response.data.access_token, tokenType: response.data.token_type }));
             navigate('/dashboard');
         } catch (err) {
             console.log(err);
+            setIsLoading(false);
         }
     }
 
@@ -29,6 +33,12 @@ export default function Signin() {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <form className="bg-white p-6 rounded shadow-md w-full max-w-sm" onSubmit={handleLogin}>
+                {isLoading && (
+                    <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+                        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                )}
+
                 <h2 className="text-2xl font-bold mb-4">Admin Login</h2>
 
                 <input
@@ -43,7 +53,7 @@ export default function Signin() {
                     className="w-full border p-2 mb-4 rounded"
                 />
 
-                <button className="bg-blue-500 text-white w-full p-2 rounded hover:bg-blue-600" type="submit">
+                <button disabled={isLoading} className="bg-blue-500 text-white w-full p-2 rounded hover:bg-blue-600" type="submit">
                     Login
                 </button>
 

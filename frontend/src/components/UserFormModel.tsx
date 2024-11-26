@@ -13,6 +13,7 @@ export default function UserFormModel({ user, onClose }: Props) {
     const [formData, setFormData] = useState<User>({ ...user });
     const dispatch = useDispatch();
     const initialUserData = useRef<User>({ ...user });
+    const [isLoading, setLoading] = useState(false);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -35,6 +36,7 @@ export default function UserFormModel({ user, onClose }: Props) {
         }
 
         if (Object.keys(updatedInfo).length > 0) {
+            setLoading(true);
             api.put('/admin/user', {
                 admin_email: user.admin_email,
                 user_email: user.email,
@@ -43,8 +45,12 @@ export default function UserFormModel({ user, onClose }: Props) {
                 .then(() => {
                     dispatch(updateUser({ ...user, ...formData }));
                     onClose();
+                    setLoading(false);
                 })
-                .catch(console.error);
+                .catch(()=>{
+                    console.log(Error)
+                    setLoading(false);
+                });
         } else {
             onClose();
         }
@@ -53,6 +59,12 @@ export default function UserFormModel({ user, onClose }: Props) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-50">
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700 w-full max-w-md">
+                {isLoading && (
+                    <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+                        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                )}
+
                 <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                         Edit User Details
@@ -115,7 +127,7 @@ export default function UserFormModel({ user, onClose }: Props) {
                         </div>
 
                         <button
-                            type="submit"
+                            type="submit" disabled={isLoading}
                             className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         >
                             Save Changes
