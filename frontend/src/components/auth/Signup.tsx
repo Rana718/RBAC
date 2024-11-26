@@ -7,6 +7,7 @@ import { api } from "../../services/api";
 export default function SignUp() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const navigate = useNavigate();
 
@@ -18,7 +19,7 @@ export default function SignUp() {
             return;
         }
         try {
-            await api.post('/admin/signup', { email, password });
+            await api.post('/admin/signup', { email, password, username });
             console.log('Account created successfully');
             navigate('/login');
         } catch (err) {
@@ -35,6 +36,12 @@ export default function SignUp() {
                 <input
                     type="email" placeholder="Email" value={email}
                     onChange={(e) => setEmail(e.target.value)} required
+                    className="w-full border p-2 mb-4 rounded"
+                />
+
+                <input
+                    type="text" placeholder="Username" value={username}
+                    onChange={(e) => setUsername(e.target.value)} required
                     className="w-full border p-2 mb-4 rounded"
                 />
 
