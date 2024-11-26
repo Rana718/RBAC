@@ -53,19 +53,24 @@ export const api = {
   },
 
   async deleteUser(id: string): Promise<void> {
+    console.log("Attempting to delete user with ID:", id);
+    
+    if (!id) {
+      throw new Error("User ID is required");
+    }
+
     try {
       await axios.delete(`${API_URL}/users/${id}`);
     } catch (error) {
-      const axiosError = error as AxiosError<ErrorResponse>;
-      if (axiosError.response?.status === 404) {
-        throw new Error("User not found");
+      const axiosError = error as AxiosError<{ detail: string }>;
+      console.log("Delete error response:", axiosError.response?.data);
+      if (axiosError.response?.status === 400) {
+        throw new Error(axiosError.response.data.detail || "Invalid user ID");
       }
-      if (axiosError.response?.status === 500) {
-        throw new Error(
-          axiosError.response.data.message || "Failed to delete user",
-        );
+      if (axiosError.response?.data?.detail) {
+        throw new Error(axiosError.response.data.detail);
       }
-      throw error;
+      throw new Error("Failed to delete user");
     }
   },
 

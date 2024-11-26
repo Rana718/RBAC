@@ -53,33 +53,12 @@ const UserManagement: React.FC = () => {
   const fetchRoles = async () => {
     try {
       const data = await api.getRoles();
-      console.log('Fetched roles:', data);
       setRoles(data);
       if (data.length > 0) {
         setCurrentUser((prev) => ({ ...prev, role: data[0].name }));
       }
     } catch (error) {
       console.error("Error fetching roles:", error);
-      setRoles([
-        { 
-          _id: '1', 
-          name: 'USER', 
-          description: 'Regular user with basic access',
-          permissions: ['read']
-        },
-        { 
-          _id: '2', 
-          name: 'ADMIN', 
-          description: 'Administrator with full access',
-          permissions: ['read', 'write', 'delete', 'manage']
-        },
-        { 
-          _id: '3', 
-          name: 'EMPLOY', 
-          description: 'Employee with standard permissions',
-          permissions: ['read', 'write']
-        }
-      ]);
     }
   };
   const handleAddNew = () => {
@@ -92,6 +71,10 @@ const UserManagement: React.FC = () => {
     setIsEditing(false);
     setShowModal(true);
   };
+
+  useEffect(() => {
+    console.log(filteredAndSortedUsers)
+  })
 
   const handleEdit = (user: User) => {
     setCurrentUser(user);
@@ -245,19 +228,11 @@ const UserManagement: React.FC = () => {
           aria-label="Filter users by role"
         >
           <option value="all">All Roles</option>
-          <option value="USER">USER</option>
-          <option value="ADMIN">ADMIN</option>
-          <option value="EMPLOY">EMPLOY</option>
-          {roles.map((role) => {
-            if (!["USER", "ADMIN", "EMPLOY"].includes(role.name)) {
-              return (
-                <option key={role._id} value={role.name}>
-                  {role.name}
-                </option>
-              );
-            }
-            return null;
-          })}
+          {roles.map((role) => (
+            <option key={role._id} value={role.name}>
+              {role.name}
+            </option>
+          ))}
         </select>
       </div>
       {/* Table Section Component */}
