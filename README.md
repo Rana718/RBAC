@@ -47,3 +47,54 @@ This project is an admin dashboard designed for managing users, roles, and permi
 - **bcrypt:** For password hashing.
 
 ---
+
+
+## **Setup Instructions**
+
+### **Prerequisites**
+- Node.js (v16 or higher)
+- Python (v3.10 or higher)
+- PostgreSQL (v13 or higher)
+
+### **Setup**
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Rana718/RBAC.git
+   ```
+2. **Backend Setup** 
+   ```bash
+   cd backend 
+   pip install -r requirements.txt
+   ```
+   Configure environment variables in a `.env` file
+   ```bash
+   DATABASE_URL='your database url'
+   JWT_KEY='your Jwt key'
+   ```
+   run the Backend server using this commend
+   ```bash
+   uvicorn main:app --reload --port 5000 
+   ```
+
+3. **Frontend Setup**
+   ```bash
+   cd frontend
+   bun install
+   ```
+   Configure environment variables in a `.env` file
+   ```bash
+   VITE_API_URL='your api url'
+   ```
+   run the frontend server using this commend
+   ```bash
+   bun run dev
+   ```
+
+4. **Access the application** at `http://localhost:5173`
+
+
+
+-----
+
+
+   
