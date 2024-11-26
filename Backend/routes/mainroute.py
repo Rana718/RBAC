@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import get_db
 from db.models import Admin, User
-from db.schemas import AdminSignup, AdminLogin, UserCreate, UserUpdate, AdminEmail
+from db.schemas import AdminSignup, AdminLogin, UserCreate, UserUpdate, AdminEmail, DeleteUserRequest
 from utils.auth import hash_password, verify_password, create_jwt_token, get_current_admin
 
 
@@ -27,7 +27,7 @@ def admin_login(admin: AdminLogin, db: Session = Depends(get_db)):
     if not db_admin or not verify_password(admin.password, db_admin.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     token = create_jwt_token(data={"sub": db_admin.email})
-    return {"access_token": token, "token_type": "bearer"}
+    return {"email": admin.email,"access_token": token, "token_type": "bearer"}
 
 
 @router.post("/user")
@@ -40,7 +40,7 @@ def add_user(user: UserCreate, db: Session = Depends(get_db), current_admin: Adm
         email=user.user_email,
         password=hash_password(user.user_password),
         role=user.role,
-        permissions=",".join(user.permissions),
+        permissions=user.permissions,
         admin_id=db_admin.id
     )
     db.add(new_user)
@@ -49,10 +49,13 @@ def add_user(user: UserCreate, db: Session = Depends(get_db), current_admin: Adm
 
 
 @router.delete("/user")
-def delete_user(user: UserUpdate, db: Session = Depends(get_db), current_admin: Admin = Depends(get_current_admin)):
-    db_user = db.query(User).filter(User.email == user.user_email).first()
-    if not db_user or db_user.admin_id != current_admin.id:
-        raise HTTPException(status_code=403, detail="You cannot delete this user")
+def delete_user(request: DeleteUserRequest, db: Session = Depends(get_db), current_admin: Admin = Depends(get_current_admin)):
+    db_admin = db.query(Admin).filter(Admin.email == request.admin_email).first()
+    if not db_admin or db_admin.id != current_admin.id:
+        raise HTTPException(status_code=403, detail="You cannot delete users for this admin")
+    db_user = db.query(User).filter(User.email == request.user_email, User.admin_id == db_admin.id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
     db.delete(db_user)
     db.commit()
     return {"message": "User deleted successfully"}
@@ -60,14 +63,13 @@ def delete_user(user: UserUpdate, db: Session = Depends(get_db), current_admin: 
 
 @router.put("/user")
 def update_user(user: UserUpdate, db: Session = Depends(get_db), current_admin: Admin = Depends(get_current_admin)):
-    admin = db.query(Admin).filter(Admin.email == user.admin_email).first()
-    if not admin:
-        raise HTTPException(status_code=404, detail="Admin not found")
+    db_admin = db.query(Admin).filter(Admin.email == user.admin_email).first()
+    if not db_admin or db_admin.id != current_admin.id:
+        raise HTTPException(status_code=403, detail="You cannot update users for this admin")
     
     db_user = db.query(User).filter(User.email == user.user_email).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
-
     
     update_info = user.update_info
     if "username" in update_info:
@@ -75,8 +77,10 @@ def update_user(user: UserUpdate, db: Session = Depends(get_db), current_admin: 
     if "role" in update_info:
         db_user.role = update_info["role"]
     if "permissions" in update_info:
-        db_user.permissions = ",".join(update_info["permissions"])  # Handle permissions list if required
-
+        db_user.permissions = ",".join(update_info["permissions"]) 
+    if "password" in update_info:
+        db_user.password = hash_password(update_info["password"]) 
+    
     db.commit()
     return {"message": "User updated successfully"}
 

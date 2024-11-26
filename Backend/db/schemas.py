@@ -27,3 +27,8 @@ class UserUpdate(BaseModel):
 
 class AdminEmail(BaseModel):
     email: EmailStr
+
+
+class DeleteUserRequest(BaseModel):
+    admin_email: str
+    user_email: str
