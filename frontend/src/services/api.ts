@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { User, Role } from "../types";
 
-const API_URL = import.meta.env.API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.API_URL;
 
 interface ErrorResponse {
   message: string;
