@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { deleteUser, setUsers } from "../redux/userSlice";
 import { useNavigate } from "react-router-dom";
-import UserFormModel  from "./UserFormModel";
+import UserFormModel from "./UserFormModel";
 import type { User } from '../../types';
 import { motion } from "framer-motion";
+import AddUserModel from "./AddUserModel";
 
 export default function AdminDashboard() {
     const dispatch = useDispatch<AppDispatch>();
@@ -14,6 +15,7 @@ export default function AdminDashboard() {
     const adminEmail = useSelector((state: RootState) => state.admin.email);
     const navigate = useNavigate();
     const [showModel, setShowModel] = useState(false);
+    const [showAddModel, setShowAddModel] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User>();
 
     useEffect(() => {
@@ -25,7 +27,9 @@ export default function AdminDashboard() {
         api.post('/admin/getusers', { email: adminEmail }).then(res => {
             dispatch(setUsers(res.data));
         }).catch(err => console.log(err));
-    }, [adminEmail, navigate, dispatch]);
+
+        console.log(users);
+    }, [adminEmail, navigate, dispatch, showAddModel, selectedUser]);
 
     const handleDelete = (userEmail: string) => {
         api.delete('/admin/user', {
@@ -42,6 +46,10 @@ export default function AdminDashboard() {
         setShowModel(true);
     };
 
+    const handleAddUser = () => {
+        setShowAddModel(true);
+    };
+
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
             <motion.h1
@@ -52,6 +60,10 @@ export default function AdminDashboard() {
             >
                 Admin Dashboard
             </motion.h1>
+
+            <button onClick={handleAddUser} className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                Add User
+            </button>
 
             <div className="overflow-x-auto">
                 <table className="table-auto w-full bg-white shadow-md rounded-lg overflow-hidden">
@@ -83,10 +95,11 @@ export default function AdminDashboard() {
                                 <td className="border px-4 py-2">{user.email}</td>
                                 <td className="border px-4 py-2">{user.role}</td>
                                 <td className="border px-4 py-2">
-                                    {user.permissions && user.permissions.length > 0
+                                    {Array.isArray(user.permissions) && user.permissions.length > 0
                                         ? user.permissions.join(', ')
                                         : "No Permissions"}
                                 </td>
+
                                 <td className="border px-4 py-2 text-center space-x-4">
                                     <button
                                         onClick={() => handleUpdate(user)}
@@ -108,7 +121,7 @@ export default function AdminDashboard() {
                 </table>
             </div>
 
-            {showModel && (
+            {showModel && selectedUser && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -118,6 +131,14 @@ export default function AdminDashboard() {
                     <UserFormModel user={selectedUser} onClose={() => setShowModel(false)} />
                 </motion.div>
             )}
+
+            {showAddModel && adminEmail && (
+                <AddUserModel
+                    adminEmail={adminEmail}
+                    onClose={() => setShowAddModel(false)}
+                />
+            )}
+
         </div>
     );
 }

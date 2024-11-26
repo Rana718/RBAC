@@ -16,19 +16,23 @@ export default function UserFormModel({ user, onClose }: Props) {
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        if (name === "permissions") {
+            setFormData({ ...formData, permissions: value.split(",").map(p => p.trim()) });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         const updatedInfo: Partial<User> = {};
-        Object.keys(initialUserData.current).forEach((key) => {
+
+        for (const [key, value] of Object.entries(formData)) {
             const field = key as keyof User;
-            if (formData[field] !== initialUserData.current[field]) {
-                updatedInfo[field] = formData[field];
+            if (value !== initialUserData.current[field]) {
+                updatedInfo[field] = value;
             }
-        });
+        }
 
         if (Object.keys(updatedInfo).length > 0) {
             api.put('/admin/user', {
@@ -37,7 +41,7 @@ export default function UserFormModel({ user, onClose }: Props) {
                 update_info: updatedInfo,
             })
                 .then(() => {
-                    dispatch(updateUser({ id: user.id, ...formData }));
+                    dispatch(updateUser({ ...user, ...formData }));
                     onClose();
                 })
                 .catch(console.error);
@@ -105,7 +109,7 @@ export default function UserFormModel({ user, onClose }: Props) {
                                 type="text"
                                 name="permissions"
                                 onChange={handleChange}
-                                value={formData.permissions.join(", ")}
+                                value={formData.permissions}
                                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                             />
                         </div>

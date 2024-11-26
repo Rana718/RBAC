@@ -2,7 +2,7 @@ import axios from "axios";
 import { store } from "../redux/store";
 
 
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const api = axios.create({
     baseURL: API_URL,
