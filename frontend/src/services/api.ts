@@ -8,7 +8,6 @@ interface ErrorResponse {
   message: string;
 }
 export const api = {
-  // User endpoints
   async getUsers(): Promise<User[]> {
     try {
       const response = await axios.get<User[]>(`${API_URL}/users`);
@@ -22,7 +21,7 @@ export const api = {
     }
   },
 
-  async createUser(user: Omit<User, "_id">): Promise<User> {
+  async createUser(user: Omit<User, "id">): Promise<User> {
     try {
       const response = await axios.post<User>(`${API_URL}/users`, user);
       return response.data;
@@ -35,7 +34,7 @@ export const api = {
     }
   },
 
-  async updateUser(id: string, user: Omit<User, "_id">): Promise<User> {
+  async updateUser(id: string, user: Omit<User, "id">): Promise<User> {
     try {
       const response = await axios.put<User>(`${API_URL}/users/${id}`, user);
       return response.data;
@@ -75,7 +74,7 @@ export const api = {
     }
   },
 
-  // Role endpoints
+
   async getRoles(): Promise<Role[]> {
     try {
       const response = await axios.get<Role[]>(`${API_URL}/roles`);

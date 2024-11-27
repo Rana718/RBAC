@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 
 interface UserModalProps {
   showModal: boolean;
-  user: Omit<User, "_id"> & { _id?: string };
+  user: Omit<User, "id"> & { id?: string };
   roles: Role[];
   isEditing: boolean;
   onClose: () => void;

@@ -14,7 +14,7 @@ const UserManagement: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<
-    Omit<User, "_id"> & { _id?: string }
+    Omit<User, "id"> & { id?: string }
   >({
     name: "",
     email: "",
@@ -72,10 +72,6 @@ const UserManagement: React.FC = () => {
     setShowModal(true);
   };
 
-  useEffect(() => {
-    console.log(filteredAndSortedUsers)
-  })
-
   const handleEdit = (user: User) => {
     setCurrentUser(user);
     setIsEditing(true);
@@ -84,7 +80,7 @@ const UserManagement: React.FC = () => {
   const filteredAndSortedUsers = useMemo(() => {
     let filtered = [...users];
 
-    // Searching for users
+
     if (searchTerm) {
       filtered = filtered.filter(
         (user) =>
@@ -93,17 +89,17 @@ const UserManagement: React.FC = () => {
       );
     }
 
-    // Filtering User on status
+
     if (statusFilter !== "all") {
       filtered = filtered.filter((user) => user.status === statusFilter);
     }
 
-    // Filtering User on rowl
+
     if (roleFilter !== "all") {
       filtered = filtered.filter((user) => user.role === roleFilter);
     }
 
-    // Sorting User Ascending or Descending
+
     filtered.sort((a, b) => {
       const aValue = a[sortConfig.key].toLowerCase();
       const bValue = b[sortConfig.key].toLowerCase();
@@ -127,11 +123,11 @@ const UserManagement: React.FC = () => {
   };
   const handleSave = async (formData: UserFormData) => {
     try {
-      if (isEditing && currentUser._id) {
-        const updatedUser = await api.updateUser(currentUser._id, formData);
+      if (isEditing && currentUser.id) {
+        const updatedUser = await api.updateUser(currentUser.id, formData);
         setUsers(
           users.map((user) =>
-            user._id === currentUser._id ? updatedUser : user,
+            user.id === currentUser.id ? updatedUser : user,
           ),
         );
         toast.success("User updated successfully!");
@@ -151,7 +147,7 @@ const UserManagement: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       await api.deleteUser(id);
-      setUsers(users.filter((user) => user._id !== id));
+      setUsers(users.filter((user) => user.id !== id));
       toast.success("User deleted successfully!");
     } catch (error) {
       if (error instanceof Error) {
@@ -172,7 +168,6 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-semibold text-gray-800">
@@ -194,7 +189,7 @@ const UserManagement: React.FC = () => {
       </div>
 
       <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Search Input Component*/}
+        
         <div className="relative">
           <input
             type="text"
@@ -206,7 +201,7 @@ const UserManagement: React.FC = () => {
           <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
 
-        {/* Status Filter  Component*/}
+        
         <select
           value={statusFilter}
           onChange={(e) =>
@@ -220,7 +215,7 @@ const UserManagement: React.FC = () => {
           <option value="inactive">Inactive</option>
         </select>
 
-        {/* Role Filter Component */}
+        
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
@@ -235,14 +230,14 @@ const UserManagement: React.FC = () => {
           ))}
         </select>
       </div>
-      {/* Table Section Component */}
+      
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="overflow-x-auto">
           <div className="max-h-[calc(100vh-250px)] overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-800 sticky top-0 z-10">
                 <tr>
-                  {/* Sortable Column Headers */}
+                  
                   <th
                     className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider cursor-pointer flex gap-2"
                     onClick={() => handleSort("name")}
@@ -270,18 +265,14 @@ const UserManagement: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredAndSortedUsers.map((user) => (
+                {filteredAndSortedUsers.map((user, index) => (
                   <tr
-                    key={user._id}
+                    key={index}
                     className="hover:bg-gray-50 transition-colors duration-150 ease-in-out"
                   >
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {/* <div className="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-600">
-                            {user.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div> */}
+                        
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
                             {user.name}
@@ -298,12 +289,11 @@ const UserManagement: React.FC = () => {
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded bg-blue-100 text-blue-800
-                          ${
-                            user.role === "Admin"
-                              ? "bg-green-100 text-green-800"
-                              : user.role === "Moderator"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-blue-100 text-blue-800"
+                          ${user.role === "Admin"
+                            ? "bg-green-100 text-green-800"
+                            : user.role === "Moderator"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-blue-100 text-blue-800"
                           }
                         `}
                       >
@@ -312,11 +302,10 @@ const UserManagement: React.FC = () => {
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                       <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded ${
-                          user.status === "active"
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded ${user.status === "active"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
                         {user.status}
                       </span>
@@ -330,7 +319,10 @@ const UserManagement: React.FC = () => {
                         <FiEdit2 className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(user._id)}
+                        onClick={() => {
+                          handleDelete(user.id)
+                          
+                        }}
                         className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-50 transition-colors duration-200 ml-2"
                         title="Delete user"
                       >
@@ -345,7 +337,7 @@ const UserManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* No Users Message */}
+      
       {filteredAndSortedUsers.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500">No users found</p>
